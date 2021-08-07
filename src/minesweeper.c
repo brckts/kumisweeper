@@ -16,6 +16,7 @@ main(void)
 
 	InitWindow(screenWidth, screenHeight, "Kumisweeper");
 	SetWindowState(FLAG_WINDOW_RESIZABLE);
+	loadTextures();
 
 	SetTargetFPS(30);
 
@@ -63,6 +64,7 @@ main(void)
 void
 cleanNClose(Board *b)
 {
+	unloadTextures();
 	UnloadFont(GetFontDefault());
 	CloseWindow();
 	exit(EXIT_SUCCESS);

@@ -1,8 +1,5 @@
 #include "raylib.h"
 
-#define WINTEXT "You won!"
-#define LOSETEXT "You lost!"
-
 #ifndef BOARD
 #define BOARD
 #include "board.h"

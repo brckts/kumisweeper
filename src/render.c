@@ -1,36 +1,94 @@
 #include "minesweeper.h"
+#include <raylib.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <raymath.h>
+
+enum Textures {
+	MINE,
+	FLAG,
+	LOGO
+};
 
 extern int debug;
 char topText[255];
-const char name[] = "Kumisweeper";
+const char name[] = "DEKOUMIKEUR";
+const char retry[] = "REVIEN O MENU AVEK R";
+const char loseText[] = "TA PERDU!";
+const char winText[] = "TA GAGNER!";
+const char quitText[] = "KITER";
 const char *diffs[] = {
-	"Novice",
-	"Intermediate",
-	"Expert"
+	"FACIL",
+	"MOYAN",
+	"DUR"
 };
+
+const Color indicatorColors[] = {
+	SKYBLUE,
+	BLUE,
+	DARKBLUE,
+	GREEN,
+	YELLOW,
+	RED,
+	PURPLE,
+	DARKPURPLE
+};
+
+Texture2D textures[3];
+
+void
+loadTextures(void)
+{
+	textures[MINE] = LoadTexture("src/resources/patoche_transparent.png");
+	textures[FLAG] = LoadTexture("src/resources/koin.png");
+	textures[LOGO] = LoadTexture("src/resources/patoche_transparent.png");
+}
+
+void
+unloadTextures(void)
+{
+	for (int i = 0; i < 3; ++i)
+		UnloadTexture(textures[i]);
+}
+
+void
+drawHitMarker(Vector2 pos)
+{
+	int innerRadius = 10;
+	int outerRadius = 30;
+	float angle;
+	Vector2 start;
+	Vector2 end;
+
+	for (int i = 0; i < 4; ++i) {
+		angle = PI / 2.0F * i + PI / 4.0F;
+		start = Vector2Add(pos, (Vector2) { cosf(angle) * innerRadius, sinf(angle) * innerRadius});
+		end = Vector2Add(pos, (Vector2) { cosf(angle) * outerRadius, sinf(angle) * outerRadius});
+		DrawLineEx(start, end, 10.0F, GOLD);
+	}
+}
+
+void
+drawTextureTile(Texture2D texture, Rectangle rec)
+{
+	DrawTextureEx(texture, (Vector2) {rec.x, rec.y}, 0.0F, (float) (rec.width) / 128.0F, WHITE);
+}
 
 void
 drawTile(int i, Board *b)
 {
 	char indicator[2];
-	Color indicatorColors[] = {
-		SKYBLUE,
-		BLUE,
-		DARKBLUE,
-		GREEN,
-		YELLOW,
-		RED,
-		PURPLE,
-		DARKPURPLE
-	};
 	int fSize = b->recs[i].width;
 
 	if (b->board[i] & REVEALED) {
 		int adjMines = getAdjacentMines(i, b);
 
-		DrawRectangleRec(b->recs[i], b->board[i] & MINED ? RED : RAYWHITE);
+		if (b->board[i] & MINED) {
+			DrawRectangleRec(b->recs[i], RED);
+			drawTextureTile(textures[MINE], b->recs[i]);
+		} else {
+			DrawRectangleRec(b->recs[i], RAYWHITE);
+		}
 
 		if (adjMines != 0 && !(b->board[i] & MINED)) {
 			sprintf(indicator, "%d", adjMines);
@@ -41,6 +99,7 @@ drawTile(int i, Board *b)
 
 	if (b->board[i] & FLAGGED) {
 		DrawRectangleRec(b->recs[i], BLUE);
+		drawTextureTile(textures[FLAG], b->recs[i]);
 		return;
 	}
 
@@ -85,12 +144,37 @@ drawEndScreen(int sw, int sh, Board *b)
 {
 	DrawRectangle(0, 0, sw, sh, (Color) {200, 200, 200, 200});
 	if(b->state == WON) {
-		DrawText(WINTEXT, sw/2 - MeasureText(WINTEXT, 50)/2, sh/2 - 50, 50, BLACK);
+		DrawText(winText, sw/2 - MeasureText(winText, 50)/2, sh/2 - 50, 50, BLACK);
 	} else {
-		DrawText(LOSETEXT, sw/2 - MeasureText(LOSETEXT, 50)/2, sh/2 - 50, 50, BLACK);
+		DrawText(loseText, sw/2 - MeasureText(loseText, 50)/2, sh/2 - 50, 50, BLACK);
 	}
 
-	DrawText("Press R to go back to the main menu...", sw/2 - MeasureText("Press R to go back to the main menu...", 40)/2, sh/2, 40, BLACK);
+	DrawText(retry, sw/2 - MeasureText(retry, 40)/2, sh/2, 40, BLACK);
+}
+
+void
+drawRotatingTexture(float speed, Vector2 pos, Texture2D texture)
+{
+	int rotCircleRadius = sqrt(2) * 64;
+	Vector2 circlePos = { pos.x + 64, pos.y + 64 };
+	float logoRot = (int)(GetTime() * speed) % 360;
+	float angle = DEG2RAD * logoRot - (3.0F / 4.0F) * PI;
+	Vector2 logoPos = Vector2Add(circlePos, (Vector2) {cosf(angle) * rotCircleRadius, sinf(angle) * rotCircleRadius});
+	DrawTextureEx(texture, logoPos, logoRot, 1.0F, WHITE);
+}
+
+void
+drawTitle(int titleFSize)
+{
+	int txtWidth = MeasureText(name, titleFSize);
+	int titleX = (GetScreenWidth() - txtWidth)/2;
+
+	Vector2 logoPos = { titleX - 180, 30 };
+
+
+	DrawText(name, titleX, 30, titleFSize, RAYWHITE);
+	drawRotatingTexture(40.0F, logoPos, textures[LOGO]);
+	drawRotatingTexture(-40.0F, (Vector2) { titleX + txtWidth + 52, 30 }, textures[LOGO]);
 }
 
 void
@@ -124,7 +208,7 @@ renderDiffSelect(Rectangle *buttons)
 
 	BeginDrawing();
 		ClearBackground(DARKGRAY);
-		DrawText(name, (GetScreenWidth() - MeasureText(name, titleFSize))/2, 30, titleFSize, RAYWHITE);
+		drawTitle(titleFSize);
 		for (int i = 0; i < 3; ++i) {
 			DrawRectangleRec(buttons[i], GRAY);
 			DrawText(diffs[i], buttons[i].x + (recWidth - MeasureText(diffs[i], recFSize))/2, buttons[i].y + 2, recFSize, RAYWHITE);
@@ -133,7 +217,7 @@ renderDiffSelect(Rectangle *buttons)
 		}
 
 		DrawRectangleRec(buttons[3], GRAY);
-		DrawText("Quit", buttons[3].x + (recWidth - MeasureText("Quit", recFSize))/2, buttons[3].y + 2, recFSize, RAYWHITE);
+		DrawText(quitText, buttons[3].x + (recWidth - MeasureText(quitText, recFSize))/2, buttons[3].y + 2, recFSize, RAYWHITE);
 		if (getHoveredButton(buttons) == 3)
 			DrawRectangleLinesEx(buttons[3], 4, RED);
 	EndDrawing();
