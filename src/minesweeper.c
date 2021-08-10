@@ -4,24 +4,21 @@
 
 int main(void);
 void mainMenu(Rectangle *buttons, Board *b);
-void cleanNClose(Board *b);
+void cleanNClose();
 
 int debug = 0;
+Board board;
+Board *b = &board;
 
 int
 main(void)
 {
-	const int screenWidth = 1280;
-	const int screenHeight = 720;
-
-	InitWindow(screenWidth, screenHeight, "Kumisweeper");
+	InitWindow(1280, 720, "Kumisweeper");
 	SetWindowState(FLAG_WINDOW_RESIZABLE);
 	loadTextures();
 
 	SetTargetFPS(30);
 
-	Board board;
-	Board *b = &board;
 	b->state = MENU;
 
 	Rectangle buttons[4] = {
@@ -34,21 +31,21 @@ main(void)
 	while(!WindowShouldClose()) {
 		switch(b->state) {
 			case MENU:
-				handlemenuclicks(buttons, b);
+				handlemenuclicks(buttons);
 				renderDiffSelect(buttons);
 				break;
 			case PLAYING:
-				updateState(b);
-				handlekeys(b);
-				handleclicks(b);
-				render(b);
-				if (IsWindowResized()) { initRecs(b); }
+				updateState();
+				handlekeys();
+				handleclicks();
+				render();
+				if (IsWindowResized()) { initRecs(); }
 				break;
 			case WON:
 			case LOST:
-				render(b);
-				handlekeys(b);
-				if (IsWindowResized()) { initRecs(b); }
+				render();
+				handlekeys();
+				if (IsWindowResized()) { initRecs(); }
 				break;
 			default:
 				printf("SOMETHING HAS GONE HORRIBLY WRONG!\n");
@@ -58,11 +55,11 @@ main(void)
 
 	}
 
-	cleanNClose(b);
+	cleanNClose();
 }
 
 void
-cleanNClose(Board *b)
+cleanNClose()
 {
 	unloadTextures();
 	UnloadFont(GetFontDefault());

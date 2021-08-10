@@ -10,6 +10,7 @@ enum Textures {
 	LOGO
 };
 
+extern Board *b;
 extern int debug;
 char topText[255];
 const char name[] = "DEKOUMIKEUR";
@@ -75,13 +76,13 @@ drawTextureTile(Texture2D texture, Rectangle rec)
 }
 
 void
-drawTile(int i, Board *b)
+drawTile(int i)
 {
 	char indicator[2];
 	int fSize = b->recs[i].width;
 
 	if (b->board[i] & REVEALED) {
-		int adjMines = getAdjacentMines(i, b);
+		int adjMines = getAdjacentMines(i);
 
 		if (b->board[i] & MINED) {
 			DrawRectangleRec(b->recs[i], RED);
@@ -110,28 +111,28 @@ drawTile(int i, Board *b)
 }
 
 void
-drawBoard(int sw, int sh, Board *b)
+drawBoard(int sw, int sh)
 {
 	for (int i = 0; i < b->height * b->width; ++i)
-		drawTile(i, b);
+		drawTile(i);
 }
 
 void
-drawTopBar(int sw, Board *b)
+drawTopBar(int sw)
 {
 	sprintf(topText, "%d/%d", b->nFlagged, b->nMines);
 	DrawText(topText, 5, 1, OFFSET - 2, RAYWHITE);
 }
 
 void
-drawDebugOverlay(Board *b)
+drawDebugOverlay()
 {
 	int hovered = getHoveredTile(b);
 
 	DrawRectangleLinesEx(b->recs[hovered], 2.0F, GREEN);
 
 	for (int i = 0; i < 8; ++i) {
-		int adj = getAdjacentTile(hovered, i, b);
+		int adj = getAdjacentTile(hovered, i);
 		if (adj != -1)
 			DrawRectangleLinesEx(b->recs[adj], 2.0f, (b->board[adj] & MINED ? RED: GREEN));
 	}
@@ -140,7 +141,7 @@ drawDebugOverlay(Board *b)
 }
 
 void
-drawEndScreen(int sw, int sh, Board *b)
+drawEndScreen(int sw, int sh)
 {
 	DrawRectangle(0, 0, sw, sh, (Color) {200, 200, 200, 200});
 	if(b->state == WON) {
@@ -224,17 +225,17 @@ renderDiffSelect(Rectangle *buttons)
 }
 
 void
-render(Board *b)
+render()
 {
 	int sw = GetScreenWidth();
 	int sh = GetScreenHeight();
 	BeginDrawing();
 		ClearBackground(DARKGRAY);
-		drawBoard(sw, sh, b);
-		drawTopBar(sw, b);
+		drawBoard(sw, sh);
+		drawTopBar(sw);
 		if (debug)
-			drawDebugOverlay(b);
+			drawDebugOverlay();
 		if (b->state == WON || b->state == LOST)
-			drawEndScreen(sw, sh, b);
+			drawEndScreen(sw, sh);
 	EndDrawing();
 }

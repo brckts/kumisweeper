@@ -1,24 +1,25 @@
 #include "minesweeper.h"
 #include <stdlib.h>
 
+extern Board *b;
 void
-handleclicks(Board *b)
+handleclicks()
 {
 	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		int hoveredTile = getHoveredTile(b);
 		if (hoveredTile != -1)
-			revealTile(hoveredTile, b);
+			revealTile(hoveredTile);
 	}
 
 	if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
 		int hoveredTile = getHoveredTile(b);
 		if (hoveredTile != -1)
-			flagTile(hoveredTile, b);
+			flagTile(hoveredTile);
 	}
 }
 
 void
-handlemenuclicks(Rectangle *buttons, Board *b)
+handlemenuclicks(Rectangle *buttons)
 {
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		int hoveredButton = getHoveredButton(buttons);
@@ -26,8 +27,8 @@ handlemenuclicks(Rectangle *buttons, Board *b)
 			case NOVICE:
 			case INTERMEDIATE:
 			case EXPERT:
-				initBoard(hoveredButton, b);
-				initRecs(b);
+				initBoard(hoveredButton);
+				initRecs();
 				break;
 			case 3:
 				CloseWindow();
@@ -52,7 +53,7 @@ getHoveredButton(Rectangle *buttons)
 }
 
 int
-getHoveredTile(Board *b)
+getHoveredTile()
 {
 	Vector2 pos = GetMousePosition();
 	for (int i = 0; i < b->height * b->width; ++i) {

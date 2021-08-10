@@ -1,8 +1,9 @@
 #include "minesweeper.h"
 #include "stdlib.h"
 
+extern Board *b;
 void
-initBoard(enum difficulty diff, Board *b)
+initBoard(enum difficulty diff)
 {
 	switch(diff) {
 		case NOVICE:
@@ -45,7 +46,7 @@ initBoard(enum difficulty diff, Board *b)
 }
 
 void
-initRecs(Board *b)
+initRecs()
 {
 	int deltax = GetScreenWidth()/b->width;
 	int deltay = (GetScreenHeight() - OFFSET)/b->height;
@@ -59,24 +60,24 @@ initRecs(Board *b)
 }
 
 void
-freeBoard(Board *b)
+freeBoard()
 {
 	free(b->board);
 	free(b->recs);
 }
 
 void
-flagTile(int i, Board *b)
+flagTile(int i)
 {
 	b->board[i] = b->board[i] ^ FLAGGED;
 	b->nFlagged += (b->board[i] & FLAGGED) ? 1 : -1;
 }
 
 void
-revealTile(int i, Board *b)
+revealTile(int i)
 {
-	int adjMines = getAdjacentMines(i, b);
-	int adjFlags = getAdjacentFlags(i, b);
+	int adjMines = getAdjacentMines(i);
+	int adjFlags = getAdjacentFlags(i);
 
 	if (b->board[i] & FLAGGED)
 		return;
@@ -88,39 +89,39 @@ revealTile(int i, Board *b)
 
 	if (adjMines == 0 || adjMines == adjFlags) {
 		for (int dir = 0; dir < 8; ++dir) {
-			int currAdj = getAdjacentTile(i, (enum direction) dir, b);
+			int currAdj = getAdjacentTile(i, (enum direction) dir);
 			if (currAdj > 0 && !(b->board[currAdj] & FLAGGED) && !(b->board[currAdj] & REVEALED))
-				revealTile(currAdj, b);
+				revealTile(currAdj);
 		}
 	}
 }
 
 int
-getAdjacentMines(int i, Board *b)
+getAdjacentMines(int i)
 {
 	int mines = 0;
 
 	for (int j = 0; j < 8; ++j)
-		if (getAdjacentTile(i, (enum direction) j, b) != -1)
-			mines += (b->board[getAdjacentTile(i, (enum direction) j, b)] & MINED);
+		if (getAdjacentTile(i, (enum direction) j) != -1)
+			mines += (b->board[getAdjacentTile(i, (enum direction) j)] & MINED);
 
 	return mines;
 }
 
 int
-getAdjacentFlags(int i, Board *b)
+getAdjacentFlags(int i)
 {
 	int flags = 0;
 
 	for (int j = 0; j < 8; ++j)
-		if (getAdjacentTile(i, (enum direction) j, b) != -1)
-			flags += !!(b->board[getAdjacentTile(i, (enum direction) j, b)] & FLAGGED);
+		if (getAdjacentTile(i, (enum direction) j) != -1)
+			flags += !!(b->board[getAdjacentTile(i, (enum direction) j)] & FLAGGED);
 
 	return flags;
 }
 
 int
-getAdjacentTile(int i, enum direction dir, Board *b)
+getAdjacentTile(int i, enum direction dir)
 {
 	if (i == -1)
 		return -1;
@@ -131,28 +132,28 @@ getAdjacentTile(int i, enum direction dir, Board *b)
 				return i - b->width;
 			break;
 		case NORTH_EAST:
-			return getAdjacentTile(getAdjacentTile(i, NORTH, b), EAST, b);
+			return getAdjacentTile(getAdjacentTile(i, NORTH), EAST);
 			break;
 		case EAST:
 			if ((i % b->width) < (b->width - 1))
 				return i + 1;
 			break;
 		case SOUTH_EAST:
-			return getAdjacentTile(getAdjacentTile(i, SOUTH, b), EAST, b);
+			return getAdjacentTile(getAdjacentTile(i, SOUTH), EAST);
 			break;
 		case SOUTH:
 			if ((i / b->width) < (b->height - 1))
 				return i + b->width;
 			break;
 		case SOUTH_WEST:
-			return getAdjacentTile(getAdjacentTile(i, SOUTH, b), WEST, b);
+			return getAdjacentTile(getAdjacentTile(i, SOUTH), WEST);
 			break;
 		case WEST:
 			if ((i % b->width) > 0)
 				return i - 1;
 			break;
 		case NORTH_WEST:
-			return getAdjacentTile(getAdjacentTile(i, NORTH, b), WEST, b);
+			return getAdjacentTile(getAdjacentTile(i, NORTH), WEST);
 			break;
 		default:
 			return -1;
@@ -162,7 +163,7 @@ getAdjacentTile(int i, enum direction dir, Board *b)
 }
 
 void
-updateState(Board *b)
+updateState()
 {
 
 	for (int i = 0; i < b->width * b->height; ++i) {

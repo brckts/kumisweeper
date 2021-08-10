@@ -1,1 +1,1 @@
-void handlekeys(Board *b);
+void handlekeys();

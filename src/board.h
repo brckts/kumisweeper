@@ -37,12 +37,12 @@ typedef struct board {
 	enum state state;
 } Board;
 
-void initBoard(enum difficulty diff, Board *b);
-void freeBoard(Board *b);
-void initRecs(Board *b);
-void revealTile(int i, Board *b);
-void flagTile(int i, Board *b);
-int getAdjacentTile(int i, enum direction dir, Board *b);
-int getAdjacentMines(int i, Board *b);
-int getAdjacentFlags(int i, Board *b);
-void updateState(Board *b);
+void initBoard(enum difficulty diff);
+void freeBoard();
+void initRecs();
+void revealTile(int i);
+void flagTile(int i);
+int getAdjacentTile(int i, enum direction dir);
+int getAdjacentMines(int i);
+int getAdjacentFlags(int i);
+void updateState();

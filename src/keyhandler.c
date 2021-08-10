@@ -2,13 +2,15 @@
 #include "raylib.h"
 
 extern int debug;
+extern Board *b;
+
 void
-handlekeys(Board *b)
+handlekeys()
 {
 	switch(GetKeyPressed()) {
 		case KEY_R:
 			if (b->state != MENU) {
-				freeBoard(b);
+				freeBoard();
 			}
 			b->state = MENU;
 			break;
