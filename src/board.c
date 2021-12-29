@@ -1,5 +1,6 @@
 #include "minesweeper.h"
 #include "stdlib.h"
+#include <stdio.h>
 
 extern Board *b;
 void
@@ -36,12 +37,12 @@ initBoard(enum difficulty diff)
 		b->board[i] = 0;
 	for (int i = 0; i < b->nMines; ++i) {
 		int index = rand() % (b->height * b->width);
-		if (b->board[index] & 0b1) {
+		if (b->board[index] & MINED) {
 			--i;
 			continue;
 		}
 
-		b->board[index] = 0b1;
+		b->board[index] = MINED;
 	}
 }
 
@@ -79,10 +80,12 @@ revealTile(int i)
 	int adjMines = getAdjacentMines(i);
 	int adjFlags = getAdjacentFlags(i);
 
+
 	if (b->board[i] & FLAGGED)
 		return;
 
 	b->board[i] = b->board[i] | REVEALED;
+
 
 	if (b->board[i] & MINED)
 		return;
@@ -90,7 +93,7 @@ revealTile(int i)
 	if (adjMines == 0 || adjMines == adjFlags) {
 		for (int dir = 0; dir < 8; ++dir) {
 			int currAdj = getAdjacentTile(i, (enum direction) dir);
-			if (currAdj > 0 && !(b->board[currAdj] & FLAGGED) && !(b->board[currAdj] & REVEALED))
+			if (currAdj > -1 && !(b->board[currAdj] & FLAGGED || b->board[currAdj] & REVEALED))
 				revealTile(currAdj);
 		}
 	}

@@ -13,15 +13,15 @@ enum Textures {
 extern Board *b;
 extern int debug;
 char topText[255];
-const char name[] = "DEKOUMIKEUR";
-const char retry[] = "REVIEN O MENU AVEK R";
-const char loseText[] = "TA PERDU!";
-const char winText[] = "TA GAGNER!";
-const char quitText[] = "KITER";
+const char name[] = "KUMISWEEPER";
+const char retry[] = "Press [R] to go back to main menu.";
+const char loseText[] = "You lost!";
+const char winText[] = "You won!";
+const char quitText[] = "Quit";
 const char *diffs[] = {
-	"FACIL",
-	"MOYAN",
-	"DUR"
+	"Easy",
+	"Medium",
+	"Hard"
 };
 
 const Color indicatorColors[] = {
@@ -129,12 +129,12 @@ drawDebugOverlay()
 {
 	int hovered = getHoveredTile(b);
 
-	DrawRectangleLinesEx(b->recs[hovered], 2.0F, GREEN);
+	DrawRectangleLinesEx(b->recs[hovered], 2.0F, (b->board[hovered] & MINED ? RED : GREEN));
 
 	for (int i = 0; i < 8; ++i) {
 		int adj = getAdjacentTile(hovered, i);
 		if (adj != -1)
-			DrawRectangleLinesEx(b->recs[adj], 2.0f, (b->board[adj] & MINED ? RED: GREEN));
+			DrawRectangleLinesEx(b->recs[adj], 2.0f, (b->board[adj] & MINED ? RED : GREEN));
 	}
 
 	DrawText("DEBUG", 4, GetScreenHeight() - 25, 25, RED);
